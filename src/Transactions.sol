@@ -17,10 +17,12 @@ library Transactions {
         uint64 nonce;
         bytes data;
         uint64 chainId;
-        bytes r;
-        bytes s;
-        bytes v;
     }
+
+    /**
+     * EIP-155
+     * (nonce, gasprice, startgas, to, value, data, chainid, 0, 0)
+     */
 
     function encodeRLP(Legacy memory txStruct) internal pure returns (bytes memory) {
         bytes[] memory items = new bytes[](9);
@@ -36,9 +38,12 @@ library Transactions {
         }
         items[4] = RLPWriter.writeUint(txStruct.value);
         items[5] = RLPWriter.writeBytes(txStruct.data);
-        items[6] = RLPWriter.writeBytes(txStruct.v);
-        items[7] = RLPWriter.writeBytes(txStruct.r);
-        items[8] = RLPWriter.writeBytes(txStruct.s);
+        items[6] = RLPWriter.writeUint(txStruct.chainId);
+        items[7] = RLPWriter.writeBytes("0x");
+        items[8] = RLPWriter.writeBytes("0x");
+        // items[6] = RLPWriter.writeBytes(txStruct.v);
+        // items[7] = RLPWriter.writeBytes(txStruct.r);
+        // items[8] = RLPWriter.writeBytes(txStruct.s);
 
         return RLPWriter.writeList(items);
     }
@@ -61,9 +66,10 @@ library Transactions {
 
         txStruct.value = uint64(ls[4].toUint());
         txStruct.data = ls[5].toBytes();
-        txStruct.v = ls[6].toBytes();
-        txStruct.r = ls[7].toBytes();
-        txStruct.s = ls[8].toBytes();
+        txStruct.chainId = uint64(ls[6].toUint());
+        // txStruct.v = ls[6].toBytes();
+        // txStruct.r = ls[7].toBytes();
+        // txStruct.s = ls[8].toBytes();
 
         return txStruct;
     }
